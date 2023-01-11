@@ -109,41 +109,55 @@ const SEARCH_ENDPOINT = `${BASE_URL}/api/search`;
 let loc = [];
 let isLoading = false;
 
+/* display error screen */
+function errorScreen(toggle = false){
+    const getErrorScreen = document.getElementById('errorScreen')
+    if(!toggle){
+        getErrorScreen.classList.add('hidden')
+        getErrorScreen.classList.remove('flex')
+    }else{
+        getErrorScreen.classList.add('flex')
+        getErrorScreen.classList.remove('hidden')
+    }
+}
+
 /* display Loading */
-function onLoading(){
+function loading(toggle = false){
     const getLoading = document.getElementById('loading');
-    getLoading.classList.add('flex');
-    getLoading.classList.remove('hidden');
+    if(!toggle){
+        getLoading.classList.add('hidden');
+        getLoading.classList.remove('flex');
+    }else{
+        getLoading.classList.add('flex');
+        getLoading.classList.remove('hidden');
+    }
 }
 
-/* remove loading */
-function offLoading(){
-    const getLoading = document.getElementById('loading');
-    getLoading.classList.add('hidden');
-    getLoading.classList.remove('flex');
-}
-
-// if(!isLoading) offLoading()
-
-/* button for show property */
+/**
+ * button for show property
+ **/
 async function showProperty(){
-    onLoading();
+    loading(true);
     Property = !Property;
     if(Property == true){
-        await fetchPropertyApi(`${BASE_URL}/api/allheatmap`);
+        await fetchPropertyApi(`${BASE_URL}/api/allheatmap`)
     } else{
         for(i = 0; i < loc.length; i++){
             loc[i].remove();
         }
         loc = [];
     }
-    offLoading();
+    loading(false);
 }
 
 async function fetchPropertyApi(link) {
     let object = await fetch(link);
     let value = await object.json();
-    // loading = true
+
+    if(value.status == false) {
+        loading(false)
+        return errorScreen(true)
+    }
 
     value.data.forEach((data) => {
         const propertyMarker = new L.Marker([data.latitude, data.longitude])
@@ -199,8 +213,8 @@ function checkPointInCircle(x1, y1, x2, y2, r) {
  * @return {void}
  */
 async function init() {
-    onLoading()
-    if (!map) {
+    loading(true)
+    if(!map){
         map = L.map("map", { zoomControl: false }).setView(
             [currentLatitude, currentLongitude],
             13
@@ -275,10 +289,12 @@ async function init() {
         body: JSON.stringify({
             coords,
         }),
-    }).then(async (res) => await res.json());
+    }).then(async (res) => await res.json()).catch(err => {
+        loading(false)
+        errorScreen(true)});
     response = data;
     showHeatmap();
-    offLoading();
+    loading(false);
 }
 
 /**
@@ -356,7 +372,6 @@ function determineRange(price) {
             break;
         }
     }
-
     return ordinal[result];
 }
 
