@@ -8,7 +8,8 @@ var markers = [],
     circles = [],
     yOffset = 5,
     xOffset = 10,
-    coords = [];
+    coords = [],
+    Property = false;
 
 // const nameLocation = [
 //     {
@@ -58,15 +59,13 @@ var markers = [],
 // }
 
 /* Ordinal Data */
-const ordinal = [
-    {
+const ordinal = [{
         index: 1,
         l: 0,
         g: 700000000,
         opacity: 0.4,
         color: "#fad4d4",
-    },
-    {
+    },{
         index: 2,
         l: 700000000,
         g: 1000000000,
@@ -107,6 +106,52 @@ const ordinal = [
 const BASE_URL = "https://ae57-182-253-194-14.ap.ngrok.io";
 const AREA_ENDPOINT = `${BASE_URL}/api/area`;
 const SEARCH_ENDPOINT = `${BASE_URL}/api/search`;
+let loc = [];
+let isLoading = false;
+
+/* display Loading */
+function onLoading(){
+    const getLoading = document.getElementById('loading');
+    getLoading.classList.add('flex');
+    getLoading.classList.remove('hidden');
+}
+
+/* remove loading */
+function offLoading(){
+    const getLoading = document.getElementById('loading');
+    getLoading.classList.add('hidden');
+    getLoading.classList.remove('flex');
+}
+
+// if(!isLoading) offLoading()
+
+/* button for show property */
+async function showProperty(){
+    onLoading();
+    Property = !Property;
+    if(Property == true){
+        await fetchPropertyApi(`${BASE_URL}/api/allheatmap`);
+    } else{
+        for(i = 0; i < loc.length; i++){
+            loc[i].remove();
+        }
+        loc = [];
+    }
+    offLoading();
+}
+
+async function fetchPropertyApi(link) {
+    let object = await fetch(link);
+    let value = await object.json();
+    // loading = true
+
+    value.data.forEach((data) => {
+        const propertyMarker = new L.Marker([data.latitude, data.longitude])
+        .bindPopup('Price : ' + data.price)
+        .addTo(map)
+        loc.push(propertyMarker)
+    });
+}
 
 /* Elements */
 const element = document.getElementById("detail-property");
@@ -154,6 +199,7 @@ function checkPointInCircle(x1, y1, x2, y2, r) {
  * @return {void}
  */
 async function init() {
+    onLoading()
     if (!map) {
         map = L.map("map", { zoomControl: false }).setView(
             [currentLatitude, currentLongitude],
@@ -164,7 +210,6 @@ async function init() {
     map.eachLayer(function (layer) {
         map.removeLayer(layer);
     });
-
     tile = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution:
@@ -233,6 +278,7 @@ async function init() {
     }).then(async (res) => await res.json());
     response = data;
     showHeatmap();
+    offLoading();
 }
 
 /**

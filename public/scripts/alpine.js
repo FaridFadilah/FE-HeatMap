@@ -45,6 +45,7 @@ document.addEventListener("livewire:load", function () {
             },
         ],
         MapDetails: false,
+        // showProperty: false,
         long: 0,
         lat: 0,
         harga: 0,

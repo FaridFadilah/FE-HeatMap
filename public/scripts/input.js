@@ -5,6 +5,7 @@ var markers = [], loc = [];
 const BASE_URL = 'https://f632-113-11-180-58.ap.ngrok.io';
 const ALLHEATMAP = `${BASE_URL}/api/allheatmap`;
 const CREATE = `${BASE_URL}/api/create`;
+let isLoading = false
 
 /* Elements */
 const btn = document.querySelector('#submit');
@@ -13,9 +14,11 @@ const form = document.querySelector('#handleForm');
 async function fetchApi(link) {
     let object = await fetch(link);
     let value = await object.json();
+    loading = true
 
     loc = value.data.map((d) => [d.latitude, d.longitude, d.price]);
     for (i = 0; i < loc.length; i++) {
+        loading = false
         L.marker([loc[i][0], loc[i][1]])
             .bindPopup('Price : ' + loc[i][2])
             .addTo(map);

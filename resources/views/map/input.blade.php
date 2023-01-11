@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-  <div id="map" class="z-10 h-screen min-h-screen"></div>
+  <div id="map" class="z-10 h-screen"></div>
 
   <div class="absolute top-[100px] left-[50px] z-50 ">
     <form id="handleForm" method="POST" class=" rounded gap-3 p-4 w-[200px] flex flex-col bg-white">
